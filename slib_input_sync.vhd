@@ -25,6 +25,9 @@ LIBRARY IEEE;
 USE IEEE.std_logic_1164.all;
 USE IEEE.numeric_std.all;
 
+library macro_cell_lib;
+use macro_cell_lib.all;
+
 entity slib_input_sync is
     port (
         CLK         : in std_logic;     -- Clock
@@ -35,20 +38,41 @@ entity slib_input_sync is
 end slib_input_sync;
 
 architecture rtl of slib_input_sync is
-    signal iD : std_logic_vector(1 downto 0);
-begin
-    IS_D: process (RST, CLK)
-    begin
-        if (RST  = '1') then
-            iD <= (others => '0');
-        elsif (CLK'event and CLK='1') then
-            iD(0) <= D;
-            iD(1) <= iD(0);
-        end if;
-    end process;
 
-    -- Output ports
-    Q <= iD(1);
+    component sic_cell_resync is
+    generic (
+        g_pure_b2b_ff : boolean   := true;
+        g_use_srst	  : boolean   := false;
+        g_use_arst	  : boolean   := true;
+        g_srst_level  : boolean   := false;
+        g_arst_level  : boolean   := false;
+        g_reset_value : boolean   := false
+        );
+    port (
+        aRst : in  std_logic;
+        sRst : in  std_logic;
+        clk	 : in  std_logic;
+        din	 : in  std_logic;
+        dout : out std_logic
+        );
+    end component sic_cell_resync;
+
+begin
+
+    resync_cell: sic_cell_resync
+    generic map (
+        g_pure_b2b_ff => true,
+        g_use_srst    => false,
+        g_use_arst    => true,
+        g_arst_level  => true,
+        g_reset_value => false
+    ) port map (
+        aRst => RST,
+        sRst => '0',
+        clk  => CLK,
+        din  => D,
+        dout => Q
+    );
 
 end rtl;
 

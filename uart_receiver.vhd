@@ -210,7 +210,8 @@ begin
     end process;
 
     -- RX FSM
-    RX_FSM: process (CState, SIN, iFSIN, iFStopBit, iBaudStep, iBaudCount, iDataCountFinish, PEN, WLS, STB)
+   --  RX_FSM: process (CState, SIN, iFSIN, iFStopBit, iBaudStep, iBaudCount, iDataCountFinish, PEN, WLS, STB) -- [SIC_MODIFICATION]
+    RX_FSM: process (CState, SIN, iFSIN, iFStopBit, iBaudStep, iBaudCount, iDataCountFinish, PEN)
     begin
         -- Defaults
         NState          <= IDLE;

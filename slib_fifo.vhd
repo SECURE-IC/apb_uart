@@ -54,7 +54,7 @@ architecture rtl of slib_fifo is
     signal iUSAGE   : unsigned(SIZE_E-1 downto 0);              -- FIFO usage
     -- FIFO memory
     type FIFO_Mem_Type is array (2**SIZE_E-1 downto 0) of std_logic_vector(WIDTH-1 downto 0);
-    signal iFIFOMem : FIFO_Mem_Type := (others => (others => '0'));
+    signal iFIFOMem : FIFO_Mem_Type ; -- [SIC_MODIFICATION] Fix lint
 
 begin
     -- Full signal (biggest difference of read and write address)

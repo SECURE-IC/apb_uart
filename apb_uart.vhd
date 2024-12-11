@@ -393,17 +393,19 @@ begin
     iSCRWrite <= '1' when iWrite = '1' and PADDR = "111" else '0';
 
     -- Async. input synchronization
-    UART_IS_SIN: slib_input_sync port map (CLK, iRST, SIN,  iSINr);
-    UART_IS_CTS: slib_input_sync port map (CLK, iRST, CTSN, iCTSNs);
-    UART_IS_DSR: slib_input_sync port map (CLK, iRST, DSRN, iDSRNs);
-    UART_IS_DCD: slib_input_sync port map (CLK, iRST, DCDN, iDCDNs);
-    UART_IS_RI:  slib_input_sync port map (CLK, iRST, RIN,  iRINs);
+    -- [SIC_MODIFICATION] Fix lint
+    UART_IS_SIN: slib_input_sync port map (CLK => CLK, RST => iRST, D => SIN,   Q => iSINr);
+    UART_IS_CTS: slib_input_sync port map (CLK => CLK, RST => iRST, D => CTSN,  Q => iCTSNs);
+    UART_IS_DSR: slib_input_sync port map (CLK => CLK, RST => iRST, D => DSRN,  Q => iDSRNs);
+    UART_IS_DCD: slib_input_sync port map (CLK => CLK, RST => iRST, D => DCDN,  Q => iDCDNs);
+    UART_IS_RI:  slib_input_sync port map (CLK => CLK, RST => iRST, D => RIN,   Q => iRINs);
 
     -- Input filter for UART control signals
-    UART_IF_CTS: slib_input_filter generic map (SIZE => 2) port map (CLK, iRST, iBaudtick2x, iCTSNs, iCTSn);
-    UART_IF_DSR: slib_input_filter generic map (SIZE => 2) port map (CLK, iRST, iBaudtick2x, iDSRNs, iDSRn);
-    UART_IF_DCD: slib_input_filter generic map (SIZE => 2) port map (CLK, iRST, iBaudtick2x, iDCDNs, iDCDn);
-    UART_IF_RI:  slib_input_filter generic map (SIZE => 2) port map (CLK, iRST, iBaudtick2x, iRINs, iRIn);
+    -- [SIC_MODIFICATION] Fix lint
+    UART_IF_CTS: slib_input_filter generic map (SIZE => 2) port map (CLK => CLK, RST => iRST, CE => iBaudtick2x, D => iCTSNs, Q => iCTSn);
+    UART_IF_DSR: slib_input_filter generic map (SIZE => 2) port map (CLK => CLK, RST => iRST, CE => iBaudtick2x, D => iDSRNs, Q => iDSRn);
+    UART_IF_DCD: slib_input_filter generic map (SIZE => 2) port map (CLK => CLK, RST => iRST, CE => iBaudtick2x, D => iDCDNs, Q => iDCDn);
+    UART_IF_RI:  slib_input_filter generic map (SIZE => 2) port map (CLK => CLK, RST => iRST, CE => iBaudtick2x, D => iRINs,  Q => iRIn);
 
 
     -- Divisor latch register
@@ -654,9 +656,10 @@ begin
     iRXFIFOPE <= '1' when iRXFIFOEmpty = '0' and iRXFIFOQ(8)  = '1' else '0';
     iRXFIFOFE <= '1' when iRXFIFOEmpty = '0' and iRXFIFOQ(9)  = '1' else '0';
     iRXFIFOBI <= '1' when iRXFIFOEmpty = '0' and iRXFIFOQ(10) = '1' else '0';
-    UART_PEDET: slib_edge_detect port map (CLK, iRST, iRXFIFOPE, iPERE);
-    UART_FEDET: slib_edge_detect port map (CLK, iRST, iRXFIFOFE, iFERE);
-    UART_BIDET: slib_edge_detect port map (CLK, iRST, iRXFIFOBI, iBIRE);
+    -- [SIC_MODIFICATION] Fix lint
+    UART_PEDET: slib_edge_detect port map (CLK => CLK, RST => iRST, D => iRXFIFOPE, RE => iPERE, FE => open);
+    UART_FEDET: slib_edge_detect port map (CLK => CLK, RST => iRST, D => iRXFIFOFE, RE => iFERE, FE => open);
+    UART_BIDET: slib_edge_detect port map (CLK => CLK, RST => iRST, D => iRXFIFOBI, RE => iBIRE, FE => open);
     iFEIncrement    <= '1' when iRXFIFOWrite = '1' and iRXFIFOD(10 downto 8) /= "000" else '0';
     iFEDecrement    <= '1' when iFECounter /= 0 and iRXFIFOEmpty = '0' and (iPERE = '1' or iFERE = '1' or iBIRE = '1') else '0';
 
